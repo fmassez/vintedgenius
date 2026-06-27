@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VintedGenius - Générateur d'annonces</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+        .header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 22px; font-weight: 800; color: #14b8a6; letter-spacing: -0.5px; cursor: pointer; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .btn-header { padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+        .btn-primary { background: #14b8a6; color: #fff; }
+        .btn-primary:hover { background: #0d9488; transform: translateY(-1px); }
+        .btn-ghost { background: transparent; color: #64748b; border: 1px solid #e2e8f0; }
+        .btn-ghost:hover { background: #f1f5f9; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #64748b; cursor: pointer; }
+        .hero { text-align: center; padding: 40px 20px 20px; }
+        .hero h1 { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #14b8a6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+        .hero p { color: #64748b; font-size: 16px; }
+        .main-container { max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+        @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
+        .card { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+        .card-title span { color: #94a3b8; font-size: 14px; font-weight: 500; }
+        .upload-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafa; position: relative; }
+        .upload-zone:hover, .upload-zone.dragover { border-color: #14b8a6; background: #f0fdfa; }
+        .upload-zone i { font-size: 40px; color: #94a3b8; margin-bottom: 12px; display: block; }
+        .upload-zone p { color: #64748b; font-size: 14px; margin-bottom: 4px; pointer-events: none; }
+        .upload-zone small { color: #94a3b8; font-size: 12px; pointer-events: none; }
+        .upload-zone input { display: none; }
+        .photo-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; min-height: 0; }
+        .photo-item { width: 100px; height: 100px; border-radius: 10px; overflow: hidden; position: relative; border: 2px solid #e2e8f0; flex-shrink: 0; background: #f1f5f9; }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .photo-remove { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; background: rgba(239,68,68,0.9); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; border: none; transition: all 0.2s; z-index: 2; }
+        .photo-remove:hover { background: #dc2626; transform: scale(1.1); }
+        .form-group { margin-bottom: 20px; }
+        .form-label { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 8px; display: block; }
+        .form-textarea { width: 100%; min-height: 120px; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; font-family: inherit; resize: vertical; transition: border-color 0.2s; }
+        .form-textarea:focus { outline: none; border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20,184,166,0.1); }
+        .char-count { text-align: right; font-size: 12px; color: #94a3b8; margin-top: 4px; }
+        .btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+        .btn-outline { background: #fff; color: #64748b; border: 1px solid #e2e8f0; }
+        .btn-outline:hover { background: #f8fafc; }
+        .btn-generate { background: #14b8a6; color: #fff; box-shadow: 0 4px 12px rgba(20,184,166,0.3); }
+        .btn-generate:hover { background: #0d9488; transform: translateY(-1px); }
+        .btn-generate:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .sidebar-card { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .sidebar-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .sidebar-title i { color: #14b8a6; }
+        .guide-section { margin-bottom: 20px; }
+        .guide-section:last-child { margin-bottom: 0; }
+        .guide-section-title { font-size: 14px; font-weight: 700; color: #14b8a6; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .guide-section-title i { font-size: 16px; }
+        .guide-list { list-style: none; padding-left: 24px; }
+        .guide-list li { font-size: 13px; color: #64748b; margin-bottom: 6px; position: relative; }
+        .guide-list li::before { content: "•"; color: #14b8a6; position: absolute; left: -16px; font-weight: bold; }
+        .guide-text { font-size: 13px; color: #64748b; line-height: 1.7; }
+        .results-page { display: none; }
+        .back-link { display: flex; align-items: center; gap: 8px; color: #64748b; font-size: 14px; cursor: pointer; margin-bottom: 20px; padding: 8px 0; }
+        .back-link:hover { color: #14b8a6; }
+        .result-section { margin-bottom: 24px; }
+        .result-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .result-section-label { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .copy-btn { font-size: 12px; color: #14b8a6; background: none; border: none; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .copy-btn:hover { color: #0d9488; }
+        .result-box { background: #f8fafc; border-radius: 12px; padding: 16px; font-size: 14px; color: #1e293b; line-height: 1.6; border: 1px solid #f1f5f9; }
+        .result-title { font-size: 20px; font-weight: 700; color: #1e293b; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .result-item-label { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+        .result-item-value { font-size: 16px; font-weight: 700; color: #1e293b; }
+        .result-item-value.price { font-size: 24px; color: #14b8a6; }
+        .result-item-value.state { font-size: 20px; }
+        .price-explanation { font-size: 13px; color: #64748b; line-height: 1.6; margin-top: 8px; }
+        .hashtags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .hashtag { background: #f0fdfa; color: #14b8a6; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid #ccfbf1; cursor: pointer; transition: all 0.2s; }
+        .hashtag:hover { background: #14b8a6; color: #fff; }
+        .hashtag.copied { background: #22c55e; color: #fff; border-color: #22c55e; }
+        .bottom-actions { display: flex; gap: 12px; margin-top: 32px; }
+        .bottom-actions .btn { flex: 1; justify-content: center; padding: 14px; font-size: 15px; }
+        .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 1000; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 50px; height: 50px; border: 3px solid #e2e8f0; border-top-color: #14b8a6; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: #64748b; font-size: 16px; font-weight: 500; }
+        .loading-sub { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: #fff; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 1001; display: flex; align-items: center; gap: 8px; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast i { color: #22c55e; }
+        .toast.error i { color: #ef4444; }
+        .toast.warning i { color: #f59e0b; }
+        .tips-box { background: #f0fdfa; border-radius: 10px; padding: 16px; border: 1px solid #ccfbf1; }
+        .tips-title { font-size: 14px; font-weight: 700; color: #0f766e; margin-bottom: 10px; }
+        .tips-list { list-style: none; }
+        .tips-list li { font-size: 13px; color: #0f766e; margin-bottom: 6px; padding-left: 16px; position: relative; }
+        .tips-list li::before { content: "•"; position: absolute; left: 0; color: #14b8a6; font-weight: bold; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: #fff; border-radius: 16px; padding: 32px; max-width: 480px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+        .modal h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .modal p { color: #64748b; font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
+        .modal-input { width: 100%; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 16px; }
+        .modal-input:focus { outline: none; border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20,184,166,0.1); }
+        .modal-actions { display: flex; gap: 12px; }
+        .modal-actions .btn { flex: 1; justify-content: center; }
+        .api-info { background: #f0fdfa; border-radius: 8px; padding: 12px; font-size: 12px; color: #0f766e; margin-bottom: 16px; border: 1px solid #ccfbf1; }
+        .api-info a { color: #14b8a6; font-weight: 600; }
+        .history-list { max-height: 400px; overflow-y: auto; }
+        .history-item { padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+        .history-item:hover { background: #f8fafc; border-color: #14b8a6; }
+        .history-item img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: #e2e8f0; }
+        .history-item-info { flex: 1; min-width: 0; }
+        .history-item-title { font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .history-item-date { font-size: 11px; color: #94a3b8; }
+        .history-empty { text-align: center; padding: 40px; color: #94a3b8; font-size: 14px; }
+        .result-photos { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .result-photo-item { width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+        .result-photo-item img { width: 100%; height: 100%; object-fit: cover; }
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 26px; }
+            .main-container { padding: 0 12px 40px; }
+            .result-grid { grid-template-columns: 1fr; }
+            .header { padding: 10px 12px; flex-wrap: wrap; gap: 8px; }
+            .btn-header { padding: 8px 14px; font-size: 13px; }
+            .bottom-actions { flex-direction: column; }
+            .btn-row { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo" onclick="newAd()">VintedGenius</div>
+        <div class="header-actions">
+            <button class="btn-header btn-primary" onclick="newAd()">
+                <i class="fas fa-plus-circle"></i> Nouvelle Annonce
+            </button>
+            <button class="btn-header btn-ghost" onclick="toggleHistory()">
+                <i class="fas fa-clock"></i> Historique
+            </button>
+            <button class="btn-header btn-ghost" onclick="openApiModal()" title="Configurer la clé API">
+                <i class="fas fa-key"></i> API
+            </button>
+            <div class="user-avatar"><i class="fas fa-user"></i></div>
+        </div>
+    </header>
+
+    <div class="hero">
+        <h1>Créez votre annonce Vinted</h1>
+        <p>Optimisez vos ventes avec notre générateur intelligent ✨</p>
+    </div>
+
+    <div class="main-container">
+        <div class="left-col">
+            <div id="creationPage" class="card">
+                <div class="card-title">
+                    Photos (<span id="photoCount">0</span>/5)
+                    <span>10 Mo max par photo</span>
+                </div>
+                <div class="upload-zone" id="uploadZone">
+                    <i class="fas fa-image"></i>
+                    <p>Glissez vos photos ici ou cliquez pour choisir</p>
+                    <small>Formats acceptés: JPG, PNG • 5 photos maximum</small>
+                    <input type="file" id="fileInput" accept="image/*" multiple>
+                </div>
+                <div class="photo-preview" id="photoPreview"></div>
+                <div class="form-group" style="margin-top: 24px;">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="descriptionInput" placeholder="Décrivez votre article (marque, taille, état, couleur, matière, défauts éventuels...)"></textarea>
+                    <div class="char-count"><span id="charCount">0</span> caractères</div>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-outline" onclick="clearAll()">
+                        <i class="fas fa-trash-alt"></i> Tout effacer
+                    </button>
+                    <button class="btn btn-generate" id="generateBtn" onclick="generate()">
+                        <i class="fas fa-magic"></i> Générer l'annonce
+                    </button>
+                </div>
+            </div>
+
+            <div id="resultsPage" class="results-page">
+                <div class="back-link" onclick="backToCreation()">
+                    <i class="fas fa-chevron-left"></i> Nouvelle annonce
+                </div>
+                <h2 style="font-size:22px; font-weight:800; margin-bottom:4px;">Votre annonce optimisée ✨</h2>
+                <p style="color:#64748b; font-size:14px; margin-bottom:24px;">Voici votre annonce générée et optimisée pour un maximum de visibilité !</p>
+
+                <div class="result-section" id="resultPhotosSection" style="display:none;">
+                    <div class="result-section-header">
+                        <span class="result-section-label">Photos de l'annonce</span>
+                    </div>
+                    <div class="result-photos" id="resultPhotos"></div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-section-header">
+                        <span class="result-section-label">Titre</span>
+                        <button class="copy-btn" onclick="copyText('resultTitle')">
+                            <i class="fas fa-copy"></i> Copier le titre
+                        </button>
+                    </div>
+                    <div class="result-box result-title" id="resultTitle">-</div>
+                </div>
+
+                <div class="result-grid" style="margin-bottom:24px;">
+                    <div class="result-section">
+                        <div class="result-item-label">Catégorie</div>
+                        <div class="result-item-value" id="resultCategory">-</div>
+                        <div style="font-size:13px; color:#94a3b8; margin-top:2px;" id="resultSubcategory">-</div>
+                    </div>
+                    <div class="result-section">
+                        <div class="result-item-label">Marque</div>
+                        <div class="result-item-value" id="resultBrand">-</div>
+                    </div>
+                    <div class="result-section">
+                        <div class="result-item-label">Taille</div>
+                        <div class="result-item-value" id="resultSize">-</div>
+                    </div>
+                    <div class="result-section">
+                        <div class="result-item-label">Couleur</div>
+                        <div class="result-item-value" id="resultColor">-</div>
+                    </div>
+                    <div class="result-section">
+                        <div class="result-item-label">Prix conseillé</div>
+                        <div class="result-item-value price" id="resultPrice">-</div>
+                        <div class="price-explanation" id="priceExplanation">-</div>
+                    </div>
+                    <div class="result-section">
+                        <div class="result-item-label">État</div>
+                        <div class="result-item-value state" id="resultState">-</div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-section-header">
+                        <span class="result-section-label">Description</span>
+                        <button class="copy-btn" onclick="copyText('resultDescription')">
+                            <i class="fas fa-copy"></i> Copier la description
+                        </button>
+                    </div>
+                    <div class="result-box" id="resultDescription" style="white-space:pre-line;">-</div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-section-header">
+                        <span class="result-section-label">Conseils photos</span>
+                    </div>
+                    <div class="tips-box">
+                        <div class="tips-title">Conseils photos</div>
+                        <ul class="tips-list" id="photoTips"><li>-</li></ul>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-section-header">
+                        <span class="result-section-label">Hashtags suggérés</span>
+                        <button class="copy-btn" onclick="copyHashtags()">
+                            <i class="fas fa-copy"></i> Copier les hashtags
+                        </button>
+                    </div>
+                    <div class="hashtags" id="hashtagsContainer"><span class="hashtag">-</span></div>
+                </div>
+
+                <div class="bottom-actions">
+                    <button class="btn btn-secondary" onclick="copyFullAd()">
+                        <i class="fas fa-copy"></i> Copier l'annonce complète
+                    </button>
+                    <button class="btn btn-generate" onclick="newAd()">
+                        <i class="fas fa-plus"></i> Nouvelle annonce
+                    </button>
+                </div>
+            </div>
+
+            <div id="historyPage" class="card" style="display:none;">
+                <div class="back-link" onclick="showCreationPage()">
+                    <i class="fas fa-chevron-left"></i> Retour
+                </div>
+                <h2 style="font-size:22px; font-weight:800; margin-bottom:16px;"><i class="fas fa-clock" style="color:#14b8a6; margin-right:8px;"></i>Historique</h2>
+                <div class="history-list" id="historyList">
+                    <div class="history-empty">Aucune annonce générée pour le moment.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-col">
+            <div class="sidebar-card">
+                <div class="sidebar-title">
+                    <i class="fas fa-sparkles"></i> Guide d'optimisation
+                </div>
+                <div class="guide-section">
+                    <div class="guide-section-title">
+                        <i class="fas fa-camera"></i> Photos essentielles
+                    </div>
+                    <ul class="guide-list">
+                        <li>Étiquette avec marque et taille</li>
+                        <li>Vue complète de l'article</li>
+                        <li>Détails de la matière/couleur</li>
+                        <li>Défauts éventuels (honnêteté = confiance)</li>
+                    </ul>
+                </div>
+                <div class="guide-section">
+                    <div class="guide-section-title">
+                        <i class="fas fa-file-alt"></i> Description parfaite
+                    </div>
+                    <ul class="guide-list">
+                        <li>État et défauts éventuels</li>
+                        <li>Mensurations précises</li>
+                        <li>Détails non visibles en photo</li>
+                        <li>Contexte d'utilisation (occasion, saison)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sidebar-card" style="background:#f8fafc;">
+                <div class="sidebar-title" style="color:#14b8a6;">
+                    <i class="fas fa-lightbulb"></i> Comment ça marche
+                </div>
+                <p class="guide-text">
+                    Notre IA analyse en profondeur vos photos et votre description pour créer une annonce optimisée et attractive. Plus vos informations sont précises et détaillées, meilleur sera le résultat !
+                </p>
+                <div style="margin-top:12px; padding:10px; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">
+                    <div style="font-size:12px; font-weight:600; color:#1e293b; margin-bottom:4px;"><i class="fas fa-info-circle" style="color:#14b8a6; margin-right:4px;"></i>Configuration requise</div>
+                    <p style="font-size:12px; color:#64748b;">Cliquez sur le bouton <strong>API</strong> en haut à droite pour configurer votre clé OpenRouter (gratuit).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Génération de votre annonce...</div>
+        <div class="loading-sub">Analyse des photos et création du contenu optimisé par IA</div>
+    </div>
+
+    <div class="modal-overlay" id="apiModal">
+        <div class="modal">
+            <h3><i class="fas fa-key" style="color:#14b8a6; margin-right:8px;"></i>Configurer la clé API</h3>
+            <p>Pour générer des annonces optimisées avec l'IA, vous devez configurer une clé API OpenRouter (gratuit).</p>
+            <div class="api-info">
+                <i class="fas fa-external-link-alt" style="margin-right:4px;"></i>
+                Obtenez votre clé gratuite sur <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a>
+            </div>
+            <input type="password" class="modal-input" id="apiKeyInput" placeholder="Votre clé API OpenRouter (sk-or-...)">
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeApiModal()">Annuler</button>
+                <button class="btn btn-generate" onclick="saveApiKey()">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Copié dans le presse-papiers !</span>
+    </div>
+
+    <script>
+    // ==================== STATE ====================
+    let photos = [];
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem('vg_history') || '[]'); } catch(e) { history = []; }
+    let apiKey = '';
+    try { apiKey = localStorage.getItem('vg_api_key') || ''; } catch(e) { apiKey = ''; }
+    const MAX_PHOTOS = 5;
+    let currentPhotoSrcs = [];
+    let currentGeneratedData = null;
+    let isProcessingFiles = false;
+
+    // ==================== DOM ELEMENTS ====================
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoCount = document.getElementById('photoCount');
+    const descriptionInput = document.getElementById('descriptionInput');
+    const charCount = document.getElementById('charCount');
+    const generateBtn = document.getElementById('generateBtn');
+    const creationPage = document.getElementById('creationPage');
+    const resultsPage = document.getElementById('resultsPage');
+    const historyPage = document.getElementById('historyPage');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const apiModal = document.getElementById('apiModal');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const resultPhotosSection = document.getElementById('resultPhotosSection');
+    const resultPhotos = document.getElementById('resultPhotos');
+
+    // ==================== UPLOAD - FIXED VERSION ====================
+    // Prevent ALL default drag behaviors on the entire document to stop browser from opening files
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        document.body.addEventListener(eventName, preventDefaults, false);
+        window.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // Upload zone specific events
+    uploadZone.addEventListener('click', function(e) {
+        // Only trigger if clicking on the zone itself, not on children
+        if (e.target === uploadZone || e.target.tagName === 'I' || e.target.tagName === 'P' || e.target.tagName === 'SMALL') {
+            fileInput.click();
+        }
+    });
+
+    uploadZone.addEventListener('dragenter', function(e) {
+        preventDefaults(e);
+        uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragover', function(e) {
+        preventDefaults(e);
+        uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', function(e) {
+        preventDefaults(e);
+        // Only remove if leaving the zone itself, not entering a child
+        if (e.relatedTarget && !uploadZone.contains(e.relatedTarget)) {
+            uploadZone.classList.remove('dragover');
+        }
+    });
+
+    uploadZone.addEventListener('drop', function(e) {
+        preventDefaults(e);
+        uploadZone.classList.remove('dragover');
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files.length > 0) {
+            processFiles(dt.files);
+        }
+    });
+
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files.length > 0) {
+            processFiles(e.target.files);
+            // CRITICAL: Reset input so same files can be selected again
+            e.target.value = '';
+        }
+    });
+
+    function processFiles(files) {
+        if (isProcessingFiles) return;
+        isProcessingFiles = true;
+
+        const remaining = MAX_PHOTOS - photos.length;
+        if (remaining <= 0) {
+            showToast('Maximum ' + MAX_PHOTOS + ' photos atteint', 'warning');
+            isProcessingFiles = false;
+            return;
+        }
+
+        const imageFiles = [];
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (!file.type || !file.type.startsWith('image/')) {
+                continue; // Skip non-images silently
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('Photo trop lourde (max 10 Mo): ' + file.name, 'warning');
+                continue;
+            }
+            imageFiles.push(file);
+            if (imageFiles.length >= remaining) break;
+        }
+
+        if (imageFiles.length === 0) {
+            isProcessingFiles = false;
+            return;
+        }
+
+        if (files.length > remaining) {
+            showToast('Seules ' + imageFiles.length + ' photos ajoutées (max ' + MAX_PHOTOS + ')', 'warning');
+        }
+
+        let loadedCount = 0;
+        const totalToLoad = imageFiles.length;
+
+        imageFiles.forEach(function(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                photos.push({
+                    id: Date.now() + Math.random(),
+                    src: e.target.result,
+                    name: file.name
+                });
+                loadedCount++;
+                if (loadedCount >= totalToLoad) {
+                    renderPhotos();
+                    isProcessingFiles = false;
+                }
+            };
+            reader.onerror = function() {
+                loadedCount++;
+                if (loadedCount >= totalToLoad) {
+                    renderPhotos();
+                    isProcessingFiles = false;
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderPhotos() {
+        photoPreview.innerHTML = '';
+        photos.forEach(function(photo, index) {
+            const div = document.createElement('div');
+            div.className = 'photo-item';
+            div.innerHTML = '<img src="' + photo.src + '" alt="Photo ' + (index + 1) + '"><button class="photo-remove" title="Supprimer" data-idx="' + index + '"><i class="fas fa-times"></i></button>';
+            photoPreview.appendChild(div);
+        });
+        photoCount.textContent = photos.length;
+
+        // Attach event listeners to remove buttons
+        document.querySelectorAll('.photo-remove').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const idx = parseInt(this.getAttribute('data-idx'));
+                removePhoto(idx);
+            });
+        });
+    }
+
+    function removePhoto(index) {
+        if (index >= 0 && index < photos.length) {
+            photos.splice(index, 1);
+            renderPhotos();
+        }
+    }
+
+    // ==================== CHARACTER COUNT ====================
+    descriptionInput.addEventListener('input', function() {
+        charCount.textContent = descriptionInput.value.length;
+    });
+
+    // ==================== NAVIGATION ====================
+    function clearAll() {
+        photos = [];
+        renderPhotos();
+        descriptionInput.value = '';
+        charCount.textContent = '0';
+        currentGeneratedData = null;
+        currentPhotoSrcs = [];
+    }
+
+    function newAd() {
+        clearAll();
+        showCreationPage();
+    }
+
+    function showCreationPage() {
+        creationPage.style.display = 'block';
+        resultsPage.style.display = 'none';
+        historyPage.style.display = 'none';
+    }
+
+    function backToCreation() {
+        // Keep photos and text when going back
+        creationPage.style.display = 'block';
+        resultsPage.style.display = 'none';
+        historyPage.style.display = 'none';
+    }
+
+    // ==================== API MODAL ====================
+    function openApiModal() {
+        apiKeyInput.value = apiKey;
+        apiModal.classList.add('active');
+    }
+
+    function closeApiModal() {
+        apiModal.classList.remove('active');
+    }
+
+    function saveApiKey() {
+        apiKey = apiKeyInput.value.trim();
+        try { localStorage.setItem('vg_api_key', apiKey); } catch(e) {}
+        closeApiModal();
+        showToast(apiKey ? 'Clé API enregistrée !' : 'Clé API supprimée');
+    }
+
+    // ==================== HISTORY ====================
+    function toggleHistory() {
+        if (historyPage.style.display === 'none' || historyPage.style.display === '') {
+            renderHistory();
+            creationPage.style.display = 'none';
+            resultsPage.style.display = 'none';
+            historyPage.style.display = 'block';
+        } else {
+            showCreationPage();
+        }
+    }
+
+    function renderHistory() {
+        const list = document.getElementById('historyList');
+        if (!history || history.length === 0) {
+            list.innerHTML = '<div class="history-empty">Aucune annonce générée pour le moment.</div>';
+            return;
+        }
+        list.innerHTML = history.map(function(item, i) {
+            const thumb = item.thumbnail || '';
+            const hasImg = thumb && thumb.startsWith('data:image');
+            return '<div class="history-item" data-idx="' + i + '">' +
+                (hasImg ? '<img src="' + thumb + '" alt="">' : '<div style="width:48px;height:48px;border-radius:8px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image" style="color:#94a3b8;"></i></div>') +
+                '<div class="history-item-info"><div class="history-item-title">' + escapeHtml(item.title) + '</div><div class="history-item-date">' + new Date(item.date).toLocaleString('fr-FR') + '</div></div>' +
+                '<i class="fas fa-chevron-right" style="color:#94a3b8;"></i></div>';
+        }).join('');
+
+        // Attach click handlers
+        document.querySelectorAll('.history-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                const idx = parseInt(this.getAttribute('data-idx'));
+                loadHistoryItem(idx);
+            });
+        });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    }
+
+    function loadHistoryItem(index) {
+        const item = history[index];
+        if (!item || !item.data) return;
+
+        if (item.photoSrcs && item.photoSrcs.length > 0) {
+            currentPhotoSrcs = item.photoSrcs;
+            displayResultPhotos(item.photoSrcs);
+        } else {
+            resultPhotosSection.style.display = 'none';
+        }
+
+        displayResults(item.data);
+        creationPage.style.display = 'none';
+        historyPage.style.display = 'none';
+        resultsPage.style.display = 'block';
+    }
+
+    function addToHistory(data, photoSrcs) {
+        const item = {
+            id: Date.now(),
+            date: new Date().toISOString(),
+            title: data.title || 'Annonce sans titre',
+            thumbnail: photoSrcs.length > 0 ? photoSrcs[0] : '',
+            photoSrcs: photoSrcs,
+            data: data
+        };
+        history.unshift(item);
+        if (history.length > 20) history = history.slice(0, 20);
+        try { localStorage.setItem('vg_history', JSON.stringify(history)); } catch(e) {}
+    }
+
+    // ==================== GENERATION ====================
+    async function generate() {
+        const desc = descriptionInput.value.trim();
+        if (photos.length === 0 && desc === '') {
+            showToast('Ajoutez au moins une photo ou une description', 'warning');
+            return;
+        }
+
+        loadingOverlay.classList.add('active');
+        generateBtn.disabled = true;
+
+        // Save photo srcs before generation
+        currentPhotoSrcs = photos.map(function(p) { return p.src; });
+
+        try {
+            let data;
+            if (apiKey) {
+                data = await generateWithAI(desc, currentPhotoSrcs);
+            } else {
+                data = generateLocally(desc, currentPhotoSrcs);
+            }
+
+            currentGeneratedData = data;
+            displayResults(data);
+            displayResultPhotos(currentPhotoSrcs);
+            addToHistory(data, currentPhotoSrcs);
+
+            creationPage.style.display = 'none';
+            resultsPage.style.display = 'block';
+            showToast('Annonce générée avec succès !');
+        } catch (err) {
+            console.error('Generation error:', err);
+            showToast('Erreur IA, mode local activé', 'warning');
+            const data = generateLocally(desc, currentPhotoSrcs);
+            currentGeneratedData = data;
+            displayResults(data);
+            displayResultPhotos(currentPhotoSrcs);
+            addToHistory(data, currentPhotoSrcs);
+            creationPage.style.display = 'none';
+            resultsPage.style.display = 'block';
+        } finally {
+            loadingOverlay.classList.remove('active');
+            generateBtn.disabled = false;
+        }
+    }
+
+    // ==================== AI GENERATION ====================
+    async function generateWithAI(description, photoSrcs) {
+        const photoContext = photoSrcs.length > 0
+            ? '\nL\'utilisateur a fourni ' + photoSrcs.length + ' photo(s) de l\'article.\nIMPORTANT: Analyse attentivement la description ET les photos pour générer une annonce précise et réaliste.'
+            : '';
+
+        const prompt = 'Tu es un expert en rédaction d\'annonces Vinted. Analyse cette description et génère une annonce optimisée.' + photoContext + '\n\nDESCRIPTION: "' + description + '"\n\nGénère UNIQUEMENT un JSON valide avec cette structure exacte (sans markdown, sans code blocks, sans texte avant/après):\n{\n  "title": "Titre accrocheur optimisé Vinted (max 40 mots, inclure marque + type + couleur + détail accrocheur)",\n  "category": "Hommes/Femmes/Enfants",\n  "subcategory": "Sous-catégorie précise (ex: Pulls & Gilets, Shorts, Robes...)",\n  "brand": "Marque détectée ou Sans marque",\n  "size": "Taille exacte détectée",\n  "color": "Couleur principale détectée",\n  "price": "Prix en euros (ex: 15€)",\n  "priceExplanation": "Explication du prix (2-3 phrases, mentionner le prix neuf, la réduction selon l\'état, pourquoi ce prix est compétitif)",\n  "state": "Neuf avec étiquette/Neuf/Très bon état/Bon état/État satisfaisant",\n  "description": "Description détaillée avec puces (5-6 lignes avec •), style vendeur Vinted enthousiaste mais honnête, mentionner les défauts si présents",\n  "tips": ["2 conseils photos spécifiques et pertinents pour cet article"],\n  "hashtags": ["12-15 hashtags variés avec #, inclure marque, type, couleur, style, occasion, taille"]\n}\n\nRègles importantes:\n- Le titre doit être accrocheur: marque + type + couleur + un détail qui vend\n- Le prix doit être réaliste pour l\'occasion (30-80% du prix neuf selon l\'état exact mentionné)\n- La description doit être honnête, mentionner les défauts si présents dans la description utilisateur\n- Les hashtags doivent être variés: marque, type, couleur, style, occasion, saison, taille, thématique\n- Réponds UNIQUEMENT avec le JSON, aucun texte avant ou après';
+
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + apiKey,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': window.location.href,
+                'X-Title': 'VintedGenius'
+            },
+            body: JSON.stringify({
+                model: 'mistralai/mistral-7b-instruct:free',
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.7,
+                max_tokens: 1500
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(function() { return {}; });
+            throw new Error(errorData.error?.message || 'Erreur API: ' + response.status);
+        }
+
+        const result = await response.json();
+        const content = result.choices?.[0]?.message?.content || '';
+
+        // Extract JSON
+        let jsonStr = content;
+        const firstBrace = content.indexOf('{');
+        const lastBrace = content.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            jsonStr = content.substring(firstBrace, lastBrace + 1);
+        }
+
+        return JSON.parse(jsonStr);
+    }
+
+    // ==================== LOCAL GENERATION (IMPROVED) ====================
+    function generateLocally(description, photoSrcs) {
+        const d = (description || '').toLowerCase();
+
+        // === BRAND DETECTION ===
+        const brandMap = {
+            'zara': 'Zara', 'h&m': 'H&M', 'nike': 'Nike', 'adidas': 'Adidas',
+            "levi's": "Levi's", 'levis': "Levi's", 'uniqlo': 'Uniqlo', 'mango': 'Mango',
+            'bershka': 'Bershka', 'pull&bear': 'Pull&Bear', 'stradivarius': 'Stradivarius',
+            'lacoste': 'Lacoste', 'ralph lauren': 'Ralph Lauren', 'tommy hilfiger': 'Tommy Hilfiger',
+            'calvin klein': 'Calvin Klein', 'guess': 'Guess', 'diesel': 'Diesel',
+            'wrangler': 'Wrangler', 'gap': 'Gap', 'superdry': 'Superdry',
+            'the north face': 'The North Face', 'patagonia': 'Patagonia',
+            'timberland': 'Timberland', 'dr martens': 'Dr Martens',
+            'converse': 'Converse', 'vans': 'Vans', 'puma': 'Puma', 'reebok': 'Reebok',
+            'asics': 'Asics', 'new balance': 'New Balance', 'decathlon': 'Decathlon',
+            'naf naf': 'Naf Naf', 'promod': 'Promod', 'jennyfer': 'Jennyfer',
+            'cache cache': 'Cache Cache', 'bonobo': 'Bonobo', 'jules': 'Jules',
+            'celio': 'Celio', 'devred': 'Devred', 'armand thiery': 'Armand Thiery',
+            'scotch & soda': 'Scotch & Soda', 'jack & jones': 'Jack & Jones',
+            'only': 'Only', 'vero moda': 'Vero Moda', 'ganni': 'Ganni',
+            'acne studios': 'Acne Studios', 'maison kitsune': 'Maison Kitsune',
+            'a.p.c.': 'A.P.C.', 'ami': 'AMI', 'comme des garçons': 'Comme des Garçons',
+            'issey miyake': 'Issey Miyake', 'yohji yamamoto': 'Yohji Yamamoto',
+            'fjallraven': 'Fjallraven', 'peak performance': 'Peak Performance',
+            'helly hansen': 'Helly Hansen', 'icebreaker': 'Icebreaker',
+            'darn tough': 'Darn Tough', 'stance': 'Stance', 'happy socks': 'Happy Socks',
+            'falke': 'Falke', 'wolford': 'Wolford', 'calzedonia': 'Calzedonia',
+            'intimissimi': 'Intimissimi', 'tezenis': 'Tezenis', 'oysho': 'Oysho',
+            'etam': 'Etam', 'aubade': 'Aubade', 'chantelle': 'Chantelle',
+            'simone perele': 'Simone Perele', 'triumph': 'Triumph', 'sloggi': 'Sloggi',
+            'playtex': 'Playtex', 'dim': 'Dim', 'petit bateau': 'Petit Bateau',
+            'bonpoint': 'Bonpoint', 'jacadi': 'Jacadi', 'cyrillus': 'Cyrillus',
+            'sergent major': 'Sergent Major', 'okaidi': 'Okaïdi', 'vertbaudet': 'Vertbaudet',
+            "tape à l'oeil": "Tape à l'Oeil", 'dpam': 'DPAM', 'catimini': 'Catimini',
+            'absorba': 'Absorba', 'ikks': 'IKKS', 'jean bourget': 'Jean Bourget',
+            'kiabi': 'Kiabi', 'gemo': 'Gémo', 'la halle': 'La Halle', 'brice': 'Brice',
+            'olivier strelli': 'Olivier Strelli', 'selected': 'Selected', 'pieces': 'Pieces',
+            'object': 'Object', 'vila': 'Vila', 'b.young': 'b.young',
+            'soaked in luxury': 'Soaked in Luxury', 'inwear': 'InWear', 'part two': 'Part Two',
+            'mos mosh': 'Mos Mosh', 'baum und pferdgarten': 'Baum und Pferdgarten',
+            'samsoe samsoe': 'Samsøe Samsøe', 'wood wood': 'Wood Wood',
+            'norse projects': 'Norse Projects', 'our legacy': 'Our Legacy',
+            'norwegian rain': 'Norwegian Rain', 'haglofs': 'Haglöfs'
+        };
+
+        let detectedBrand = 'Sans marque';
+        for (const [key, val] of Object.entries(brandMap)) {
+            if (d.includes(key)) { detectedBrand = val; break; }
+        }
+
+        // === SIZE DETECTION ===
+        const sizePatterns = [
+            { regex: /\b(xs|s|m|l|xl|xxl|xxxl|2xl|3xl)\b/gi, transform: function(m) { return m[0].toUpperCase(); } },
+            { regex: /\b(34|36|38|40|42|44|46|48|50|52|54|56)\b/g, transform: function(m) { return m[0]; } },
+            { regex: /\b(w\d{1,2}\s*l?\d{0,2})\b/gi, transform: function(m) { return m[0].toUpperCase(); } },
+            { regex: /\b(t\d{1,2})\b/gi, transform: function(m) { return m[0].toUpperCase(); } },
+            { regex: /\b(\d{1,2}\s*ans?)\b/gi, transform: function(m) { return m[0]; } },
+            { regex: /\btaille\s+(\d+)\b/gi, transform: function(m) { return m[1]; } }
+        ];
+        let detectedSize = 'Taille standard';
+        for (const p of sizePatterns) {
+            const m = description.match(p.regex);
+            if (m) { detectedSize = p.transform(m); break; }
+        }
+
+        // === COLOR DETECTION ===
+        const colorMap = {
+            'noir': 'Noir', 'blanc': 'Blanc', 'bleu': 'Bleu', 'rouge': 'Rouge',
+            'vert': 'Vert', 'jaune': 'Jaune', 'orange': 'Orange', 'violet': 'Violet',
+            'rose': 'Rose', 'gris': 'Gris', 'beige': 'Beige', 'marron': 'Marron',
+            'camel': 'Camel', 'bordeaux': 'Bordeaux', 'marine': 'Marine',
+            'turquoise': 'Turquoise', 'corail': 'Corail', 'pastel': 'Pastel',
+            'doré': 'Doré', 'argenté': 'Argenté', 'multicolore': 'Multicolore',
+            'fleuri': 'Fleuri', 'imprimé': 'Imprimé', 'rayé': 'Rayé',
+            'à carreaux': 'À carreaux', 'à pois': 'À pois', 'denim': 'Denim',
+            'jean': 'Jean', 'cuir': 'Cuir', 'daim': 'Daim', 'velours': 'Velours',
+            'lin': 'Lin', 'soie': 'Soie', 'laine': 'Laine', 'coton': 'Coton',
+            'cachemire': 'Cachemire', 'viscose': 'Viscose', 'modal': 'Modal',
+            'tencel': 'Tencel', 'bambou': 'Bambou', 'écru': 'Écru', 'kaki': 'Kaki',
+            'moutarde': 'Moutarde', 'pêche': 'Pêche', 'saumon': 'Saumon',
+            'lilas': 'Lilas', 'lavande': 'Lavande', 'menthe': 'Menthe',
+            'émeraude': 'Émeraude', 'ivoire': 'Ivoire', 'crème': 'Crème',
+            'taupe': 'Taupe', 'moka': 'Moka', 'chocolat': 'Chocolat',
+            'caramel': 'Caramel', 'abricot': 'Abricot', 'framboise': 'Framboise',
+            'cerise': 'Cerise', 'grenat': 'Grenat', 'prune': 'Prune',
+            'aubergine': 'Aubergine', 'indigo': 'Indigo', 'cobalt': 'Cobalt',
+            'pétrole': 'Pétrole', 'canard': 'Bleu canard', 'navy': 'Navy',
+            'royal': 'Bleu royal', 'glacier': 'Bleu glacier', 'poudré': 'Rose poudré',
+            'fuchsia': 'Fuchsia', 'vieux rose': 'Vieux rose', 'blush': 'Blush',
+            'terracotta': 'Terracotta', 'brique': 'Brique', 'rouille': 'Rouille',
+            'cuivre': 'Cuivre', 'bronze': 'Bronze', 'or rose': 'Or rose',
+            'or': 'Or', 'argent': 'Argent', 'platine': 'Platine',
+            'graphite': 'Graphite', 'ardoise': 'Ardoise', 'anthracite': 'Anthracite',
+            'charbon': 'Charbon', 'ébène': 'Ébène'
+        };
+
+        let detectedColor = 'Voir photos';
+        for (const [key, val] of Object.entries(colorMap)) {
+            if (d.includes(key)) { detectedColor = val; break; }
+        }
+
+        // === CATEGORY & SUBCATEGORY ===
+        let cat = 'Unisexe', sub = 'Autres';
+        if (d.includes('robe') || d.includes('jupe') || d.includes('blouse') || d.includes('top femme') || d.includes('débardeur femme') || d.includes('soutien-gorge') || d.includes('culotte') || d.includes('lingerie')) {
+            cat = 'Femmes';
+        } else if (d.includes('chemise homme') || d.includes('polo') || d.includes('t-shirt homme') || d.includes('débardeur homme') || d.includes('pantalon homme') || d.includes('jean homme') || d.includes('short homme') || d.includes('costume') || d.includes('blazer homme') || d.includes('cravate')) {
+            cat = 'Hommes';
+        } else if (d.includes('enfant') || d.includes('bébé') || d.includes('fille') || d.includes('garçon')) {
+            cat = 'Enfants';
+        }
+
+        const subMap = [
+            { keys: ['robe'], val: 'Robes' },
+            { keys: ['jupe'], val: 'Jupes' },
+            { keys: ['pull', 'sweat', 'tricot', 'gilet', 'cardigan'], val: 'Pulls & Gilets' },
+            { keys: ['t-shirt', 'tee shirt', 'débardeur'], val: 'T-shirts & Débardeurs' },
+            { keys: ['chemise', 'blouse', 'chemisier'], val: 'Chemises & Blouses' },
+            { keys: ['pantalon', 'jean', 'chino', 'jogging', 'legging'], val: 'Pantalons' },
+            { keys: ['short'], val: 'Shorts' },
+            { keys: ['veste', 'manteau', 'blouson', 'doudoune', 'parka', 'trench'], val: 'Vestes & Manteaux' },
+            { keys: ['costume', 'blazer'], val: 'Costumes & Blazers' },
+            { keys: ['sac', 'cartable', 'besace', 'pochette', 'tote', 'sacoche'], val: 'Sacs' },
+            { keys: ['chaussure', 'basket', 'sneaker', 'bottine', 'escarpin', 'bottes', 'sandale', 'mocassin', 'derby', 'oxford'], val: 'Chaussures' },
+            { keys: ['accessoire', 'ceinture', 'écharpe', 'bonnet', 'gant', 'foulard', 'bandana', 'casquette', 'chapeau', 'bob', 'béret'], val: 'Accessoires' },
+            { keys: ['bijou', 'collier', 'bracelet', 'bague', 'montre', 'boucles d\'oreille', 'pendentif', 'broche'], val: 'Bijoux & Montres' },
+            { keys: ['maillot', 'body', 'lingerie', 'soutien-gorge', 'culotte', 'pyjama', 'peignoir', 'kimono'], val: 'Lingerie & Nuit' },
+            { keys: ['combinaison', 'salopette', 'robe de chambre'], val: 'Combinaisons & Salopettes' }
+        ];
+
+        for (const item of subMap) {
+            for (const key of item.keys) {
+                if (d.includes(key)) { sub = item.val; break; }
+            }
+            if (sub !== 'Autres') break;
+        }
+
+        // === STATE DETECTION ===
+        let detectedState = 'Bon état';
+        if (d.includes('neuf') && (d.includes('étiquette') || d.includes('tag'))) {
+            detectedState = 'Neuf avec étiquette';
+        } else if (d.includes('neuf') || d.includes('jamais porté')) {
+            detectedState = 'Neuf';
+        } else if (d.includes('très bon') || d.includes('excellent') || d.includes('comme neuf')) {
+            detectedState = 'Très bon état';
+        } else if (d.includes('satisfaisant') || d.includes('usé') || d.includes('abîmé') || d.includes('déchiré')) {
+            detectedState = 'État satisfaisant';
+        }
+
+        // === ITEM TYPE DETECTION ===
+        const typeMap = [
+            { keys: ['robe'], val: 'Robe' },
+            { keys: ['jupe'], val: 'Jupe' },
+            { keys: ['pull', 'tricot'], val: 'Pull' },
+            { keys: ['sweat'], val: 'Sweat' },
+            { keys: ['t-shirt', 'tee shirt'], val: 'T-shirt' },
+            { keys: ['débardeur'], val: 'Débardeur' },
+            { keys: ['chemise'], val: 'Chemise' },
+            { keys: ['blouse', 'chemisier'], val: 'Blouse' },
+            { keys: ['pantalon'], val: 'Pantalon' },
+            { keys: ['jean'], val: 'Jean' },
+            { keys: ['short'], val: 'Short' },
+            { keys: ['veste'], val: 'Veste' },
+            { keys: ['manteau'], val: 'Manteau' },
+            { keys: ['blouson'], val: 'Blouson' },
+            { keys: ['doudoune'], val: 'Doudoune' },
+            { keys: ['costume'], val: 'Costume' },
+            { keys: ['blazer'], val: 'Blazer' },
+            { keys: ['sac', 'cartable', 'besace'], val: 'Sac' },
+            { keys: ['chaussure', 'basket', 'sneaker', 'bottine', 'escarpin', 'bottes', 'sandale'], val: 'Chaussures' },
+            { keys: ['accessoire', 'ceinture', 'écharpe', 'bonnet', 'gant'], val: 'Accessoire' },
+            { keys: ['bijou', 'collier', 'bracelet', 'bague', 'montre'], val: 'Bijou' },
+            { keys: ['gilet', 'cardigan'], val: 'Gilet' },
+            { keys: ['polo'], val: 'Polo' },
+            { keys: ['combinaison'], val: 'Combinaison' },
+            { keys: ['salopette'], val: 'Salopette' },
+            { keys: ['jogging'], val: 'Jogging' },
+            { keys: ['legging'], val: 'Legging' },
+            { keys: ['collant'], val: 'Collant' },
+            { keys: ['chaussette'], val: 'Chaussettes' },
+            { keys: ['maillot'], val: 'Maillot' },
+            { keys: ['body'], val: 'Body' },
+            { keys: ['soutien-gorge'], val: 'Soutien-gorge' },
+            { keys: ['culotte'], val: 'Culotte' },
+            { keys: ['pyjama'], val: 'Pyjama' },
+            { keys: ['peignoir'], val: 'Peignoir' },
+            { keys: ['kimono'], val: 'Kimono' },
+            { keys: ['cape'], val: 'Cape' },
+            { keys: ['poncho'], val: 'Poncho' },
+            { keys: ['tunique'], val: 'Tunique' },
+            { keys: ['tablier'], val: 'Tablier' },
+            { keys: ['cravate'], val: 'Cravate' },
+            { keys: ['noeud papillon'], val: 'Nœud papillon' },
+            { keys: ['foulard'], val: 'Foulard' },
+            { keys: ['bandana'], val: 'Bandana' },
+            { keys: ['casquette'], val: 'Casquette' },
+            { keys: ['chapeau'], val: 'Chapeau' },
+            { keys: ['bob'], val: 'Bob' },
+            { keys: ['béret'], val: 'Béret' },
+            { keys: ['casque'], val: 'Casque' },
+            { keys: ['lunette'], val: 'Lunettes' },
+            { keys: ['masque'], val: 'Masque' },
+            { keys: ['parapluie'], val: 'Parapluie' }
+        ];
+
+        let itemType = 'Article';
+        for (const item of typeMap) {
+            for (const key of item.keys) {
+                if (d.includes(key)) { itemType = item.val; break; }
+            }
+            if (itemType !== 'Article') break;
+        }
+
+        // === BUILD TITLE ===
+        let titleParts = [];
+        if (detectedBrand !== 'Sans marque') titleParts.push(detectedBrand);
+        titleParts.push(itemType);
+        if (detectedColor !== 'Voir photos') titleParts.push(detectedColor.toLowerCase());
+
+        const styleWords = ['oversize', 'slim', 'regular', 'fit', 'cropped', 'long', 'court', 'vintage', 'retro', 'sport', 'elegant', 'casual', 'chic', 'bohème', 'streetwear', 'classique', 'moderne'];
+        for (const sw of styleWords) {
+            if (d.includes(sw)) { titleParts.push(sw); break; }
+        }
+
+        const title = titleParts.join(' ') || 'Article mode seconde main';
+
+        // === CALCULATE PRICE ===
+        const priceFactors = {
+            'Neuf avec étiquette': 0.75,
+            'Neuf': 0.65,
+            'Très bon état': 0.50,
+            'Bon état': 0.35,
+            'État satisfaisant': 0.20
+        };
+        const priceFactor = priceFactors[detectedState] || 0.35;
+
+        let baseNewPrice = 50;
+        const premiumBrands = ['nike', 'adidas', "levi's", 'levis', 'lacoste', 'ralph lauren', 'tommy hilfiger', 'calvin klein', 'the north face', 'patagonia', 'dr martens', 'ganni', 'acne studios', 'maison kitsune', 'a.p.c.', 'ami', 'comme des garçons', 'issey miyake', 'yohji yamamoto'];
+        const isPremium = premiumBrands.some(function(b) { return d.includes(b); });
+        if (isPremium) baseNewPrice = 120;
+        else if (detectedBrand !== 'Sans marque') baseNewPrice = 70;
+
+        if (['Sacs', 'Chaussures', 'Bijoux & Montres'].includes(sub)) baseNewPrice *= 1.5;
+        if (['Vestes & Manteaux', 'Costumes & Blazers'].includes(sub)) baseNewPrice *= 2;
+
+        const suggestedPrice = Math.max(5, Math.round(baseNewPrice * priceFactor));
+        const price = suggestedPrice + '€';
+        const newPriceRange = Math.round(baseNewPrice * 0.8) + '-' + Math.round(baseNewPrice * 1.2);
+        const discount = Math.round((1 - priceFactor) * 100);
+
+        const priceExplanation = 'Pour un ' + itemType.toLowerCase() + ' ' + (detectedBrand !== 'Sans marque' ? detectedBrand + ' ' : '') + 'de cette gamme, le prix neuf tourne autour de ' + newPriceRange + ' euros. L'article est en ' + detectedState.toLowerCase() + ', ce qui justifie une réduction d'environ ' + discount + '% par rapport au prix neuf. Ce prix est compétitif pour une vente rapide tout en respectant la valeur de la marque et l'état réel de l'article.';
+
+        // === BUILD DESCRIPTION ===
+        let descLines = ['Je vends ' + itemType.toLowerCase() + ' ' + (detectedBrand !== 'Sans marque' ? detectedBrand + ' ' : '') + '!'];
+
+        if (detectedSize !== 'Taille standard') {
+            descLines.push('• Taille ' + detectedSize + ', coupe adaptée et confortable');
+        } else {
+            descLines.push('• Coupe standard, confortable au quotidien');
+        }
+
+        if (detectedColor !== 'Voir photos') {
+            descLines.push('• Couleur ' + detectedColor.toLowerCase() + ', matière de qualité');
+        } else {
+            descLines.push('• Matière de qualité, bien entretenue');
+        }
+
+        descLines.push('• ' + detectedState + ', article soigneusement conservé');
+
+        if (d.includes('défaut') || d.includes('trou') || d.includes('tache') || d.includes('déchir') || d.includes('usé') || d.includes('abîm')) {
+            descLines.push('• Quelques signes d'usure visibles mentionnés en toute honnêteté');
+        } else {
+            descLines.push('• Peu porté, en excellente condition générale');
+        }
+
+        if (d.includes('poche')) descLines.push('• Poches pratiques, fonctionnelles');
+        if (d.includes('fermeture') || d.includes('zip')) descLines.push('• Fermeture éclair fonctionnelle et solide');
+        if (d.includes('bouton')) descLines.push('• Boutons originaux bien conservés');
+
+        descLines.push('');
+        descLines.push('Idéal pour compléter votre dressing avec style !');
+
+        const description = descLines.join('\n');
+
+        // === PHOTO TIPS ===
+        const tips = [
+            'Prendre l'article à plat sur un fond uni clair (blanc ou beige) pour valoriser la couleur et les détails.',
+            'Ajouter un gros plan sur l'étiquette marque/taille et un détail caractéristique (poche, bouton, couture).'
+        ];
+        if (d.includes('défaut') || d.includes('trou') || d.includes('tache')) {
+            tips.push('Ne pas oublier une photo du défaut mentionné pour être transparent avec les acheteurs.');
+        }
+
+        // === HASHTAGS ===
+        const hashtags = ['#SecondeMain', '#ModeDurable', '#Occasion', '#Vinted'];
+        if (detectedBrand !== 'Sans marque') {
+            hashtags.push('#' + detectedBrand.replace(/[^a-zA-Z0-9]/g, ''));
+        }
+        hashtags.push('#' + itemType.replace(/[^a-zA-Z0-9]/g, ''));
+        if (detectedColor !== 'Voir photos') {
+            hashtags.push('#' + detectedColor.replace(/[^a-zA-Z0-9]/g, '').toLowerCase());
+        }
+        if (detectedSize !== 'Taille standard') {
+            hashtags.push('#Taille' + detectedSize.replace(/[^a-zA-Z0-9]/g, ''));
+        }
+
+        const styleHashtags = {
+            'robe': ['#ModeFemme', '#LookElegant'],
+            'jupe': ['#ModeFemme', '#LookChic'],
+            'pull': ['#Mode', '#Cozy'],
+            'sweat': ['#Streetwear', '#Casual'],
+            't-shirt': ['#Basics', '#Essentiel'],
+            'chemise': ['#Classique', '#Workwear'],
+            'pantalon': ['#Mode', '#Pants'],
+            'jean': ['#Denim', '#Jeans'],
+            'short': ['#Summer', '#LookEstival'],
+            'veste': ['#Mode', '#Outerwear'],
+            'manteau': ['#Hiver', '#Mode'],
+            'blouson': ['#Mode', '#Jacket'],
+            'doudoune': ['#Hiver', '#Chaud'],
+            'costume': ['#Workwear', '#Business'],
+            'blazer': ['#Chic', '#Workwear'],
+            'sac': ['#Accessoire', '#Bag'],
+            'chaussure': ['#Shoes', '#Sneakers'],
+            'basket': ['#Sneakers', '#Streetwear'],
+            'accessoire': ['#Accessoire', '#Style'],
+            'bijou': ['#Bijoux', '#Accessoire']
+        };
+
+        for (const [key, vals] of Object.entries(styleHashtags)) {
+            if (d.includes(key)) {
+                hashtags.push(vals[0], vals[1]);
+                break;
+            }
+        }
+
+        if (d.includes('été') || d.includes('summer') || d.includes('short') || d.includes('robe') || d.includes('jupe') || d.includes('t-shirt') || d.includes('débardeur')) {
+            hashtags.push('#SummerStyle', '#Ete');
+        }
+        if (d.includes('hiver') || d.includes('winter') || d.includes('pull') || d.includes('manteau') || d.includes('doudoune') || d.includes('écharpe') || d.includes('bonnet')) {
+            hashtags.push('#Hiver', '#WinterStyle');
+        }
+        if (d.includes('printemps') || d.includes('spring')) hashtags.push('#Printemps', '#SpringStyle');
+        if (d.includes('automne') || d.includes('fall')) hashtags.push('#Automne', '#FallStyle');
+
+        while (hashtags.length < 12) { hashtags.push('#LookDuJour'); }
+        if (hashtags.length > 15) hashtags = hashtags.slice(0, 15);
+
+        return {
+            title: title,
+            category: cat,
+            subcategory: sub,
+            brand: detectedBrand,
+            size: detectedSize,
+            color: detectedColor,
+            price: price,
+            priceExplanation: priceExplanation,
+            state: detectedState,
+            description: description,
+            tips: tips,
+            hashtags: hashtags
+        };
+    }
+
+    // ==================== DISPLAY RESULTS ====================
+    function displayResults(data) {
+        document.getElementById('resultTitle').textContent = data.title || '-';
+        document.getElementById('resultCategory').textContent = data.category || '-';
+        document.getElementById('resultSubcategory').textContent = data.subcategory || '-';
+        document.getElementById('resultBrand').textContent = data.brand || '-';
+        document.getElementById('resultSize').textContent = data.size || '-';
+        document.getElementById('resultColor').textContent = data.color || '-';
+        document.getElementById('resultPrice').textContent = data.price || '-';
+        document.getElementById('priceExplanation').textContent = data.priceExplanation || '-';
+        document.getElementById('resultState').textContent = data.state || '-';
+        document.getElementById('resultDescription').textContent = data.description || '-';
+
+        const tipsList = document.getElementById('photoTips');
+        if (data.tips && data.tips.length > 0) {
+            tipsList.innerHTML = data.tips.map(function(t) { return '<li>' + t + '</li>'; }).join('');
+        } else {
+            tipsList.innerHTML = '<li>-</li>';
+        }
+
+        const hashtagsContainer = document.getElementById('hashtagsContainer');
+        if (data.hashtags && data.hashtags.length > 0) {
+            hashtagsContainer.innerHTML = data.hashtags.map(function(h) {
+                return '<span class="hashtag" onclick="copySingleHashtag(this)">' + h + '</span>';
+            }).join('');
+        } else {
+            hashtagsContainer.innerHTML = '<span class="hashtag">-</span>';
+        }
+    }
+
+    function displayResultPhotos(photoSrcs) {
+        if (!photoSrcs || photoSrcs.length === 0) {
+            resultPhotosSection.style.display = 'none';
+            return;
+        }
+        resultPhotosSection.style.display = 'block';
+        resultPhotos.innerHTML = photoSrcs.map(function(src) {
+            return '<div class="result-photo-item"><img src="' + src + '" alt="Photo annonce"></div>';
+        }).join('');
+    }
+
+    // ==================== COPY FUNCTIONS ====================
+    function copyText(elementId) {
+        const el = document.getElementById(elementId);
+        const text = el.textContent.trim();
+        navigator.clipboard.writeText(text).then(function() {
+            showToast('Copié dans le presse-papiers !');
+        }).catch(function() {
+            showToast('Erreur de copie', 'error');
+        });
+    }
+
+    function copyHashtags() {
+        const hashtags = Array.from(document.querySelectorAll('.hashtag')).map(function(h) { return h.textContent; }).join(' ');
+        navigator.clipboard.writeText(hashtags).then(function() {
+            showToast('Hashtags copiés !');
+        }).catch(function() {
+            showToast('Erreur de copie', 'error');
+        });
+    }
+
+    function copySingleHashtag(el) {
+        const original = el.textContent;
+        navigator.clipboard.writeText(original).then(function() {
+            el.classList.add('copied');
+            el.textContent = '✓ Copié';
+            setTimeout(function() {
+                el.classList.remove('copied');
+                el.textContent = original;
+            }, 1500);
+        }).catch(function() {
+            showToast('Erreur de copie', 'error');
+        });
+    }
+
+    function copyFullAd() {
+        const title = document.getElementById('resultTitle').textContent;
+        const desc = document.getElementById('resultDescription').textContent;
+        const hashtags = Array.from(document.querySelectorAll('.hashtag')).map(function(h) { return h.textContent; }).join(' ');
+        const fullText = title + '\n\n' + desc + '\n\n' + hashtags;
+        navigator.clipboard.writeText(fullText).then(function() {
+            showToast('Annonce complète copiée !');
+        }).catch(function() {
+            showToast('Erreur de copie', 'error');
+        });
+    }
+
+    // ==================== TOAST ====================
+    function showToast(message, type) {
+        type = type || 'success';
+        const toastEl = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMessage');
+        const icon = toastEl.querySelector('i');
+        toastMsg.textContent = message;
+        if (type === 'error') {
+            icon.className = 'fas fa-exclamation-circle';
+            toastEl.style.background = '#7f1d1d';
+        } else if (type === 'warning') {
+            icon.className = 'fas fa-exclamation-triangle';
+            toastEl.style.background = '#92400e';
+        } else {
+            icon.className = 'fas fa-check-circle';
+            toastEl.style.background = '#1e293b';
+        }
+        toastEl.classList.add('show');
+        setTimeout(function() {
+            toastEl.classList.remove('show');
+        }, 3000);
+    }
+
+    // ==================== INIT ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        showCreationPage();
+    });
+    </script>
+</body>
+</html>
